@@ -1,0 +1,11 @@
+venv/
+.venv/
+
+secrets/
+**/secrets/**
+**/credentials/**
+*.pem
+*.key
+*service-account*.json
+.env
+.env.*
