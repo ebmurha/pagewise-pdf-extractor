@@ -242,7 +242,7 @@ def write_failure_markdown(output_dir: Path, page_number: int, error_message: st
     return page_path
 
 
-def process_book(input_pdf: Path, ollama_model: str, force_ollama_fallback: bool = False) -> int:
+def process_pdf(input_pdf: Path, ollama_model: str, force_ollama_fallback: bool = False) -> int:
     if not input_pdf.exists() or not input_pdf.is_file():
         print(f"Input PDF not found: {input_pdf}", file=sys.stderr)
         return 2
@@ -275,7 +275,7 @@ def process_book(input_pdf: Path, ollama_model: str, force_ollama_fallback: bool
             force_ollama_fallback,
         )
 
-        log_event(logger, "info", f"Book: {input_pdf.name}", total_pages=total_pages, status="start")
+        log_event(logger, "info", f"PDF file: {input_pdf.name}", total_pages=total_pages, status="start")
         log_event(logger, "info", f"Pipeline: {PIPELINE_MODE}", total_pages=total_pages, status="start")
         log_event(logger, "info", f"Ollama model: {ollama_model}", total_pages=total_pages, status="start")
         if force_ollama_fallback:
@@ -417,7 +417,7 @@ def process_book(input_pdf: Path, ollama_model: str, force_ollama_fallback: bool
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run local OCR on a PDF book and output page-wise markdown files."
+        description="Run local OCR on a PDF file and output page-wise markdown files."
     )
     parser.add_argument("input_pdf", help="Path to the source PDF file")
     parser.add_argument(
@@ -437,7 +437,7 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
     input_pdf = Path(args.input_pdf).expanduser().resolve()
-    return process_book(input_pdf, args.ollama_model, force_ollama_fallback=args.force_ollama_fallback)
+    return process_pdf(input_pdf, args.ollama_model, force_ollama_fallback=args.force_ollama_fallback)
 
 
 if __name__ == "__main__":

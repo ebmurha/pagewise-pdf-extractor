@@ -30,7 +30,7 @@ MARKER_CMD = "marker_single"
 # 3. logging setup
 def setup_logger(output_dir: Path) -> logging.Logger:
     """Create a logger that writes to terminal and a persistent log file."""
-    logger = logging.getLogger("ocr_book")
+    logger = logging.getLogger("pdf_ocr_marker")
     logger.setLevel(logging.INFO)
     for handler in logger.handlers[:]:
         handler.close()
@@ -224,7 +224,7 @@ def run_marker_for_page(
 ) -> str:
     page_index = page_number - 1
 
-    with tempfile.TemporaryDirectory(prefix="ocr_book_") as temp_dir_str:
+    with tempfile.TemporaryDirectory(prefix="pdf_ocr_marker_") as temp_dir_str:
         temp_dir = Path(temp_dir_str)
         cmd = [
             MARKER_CMD,
@@ -272,7 +272,7 @@ def write_failure_markdown(output_dir: Path, page_number: int, error_message: st
 
 
 # 6. main processing loop
-def process_book(input_pdf: Path, output_root: Path = OUTPUT_ROOT) -> int:
+def process_pdf(input_pdf: Path, output_root: Path = OUTPUT_ROOT) -> int:
     if not input_pdf.exists() or not input_pdf.is_file():
         print(f"Input PDF not found: {input_pdf}", file=sys.stderr)
         return 2
@@ -299,7 +299,7 @@ def process_book(input_pdf: Path, output_root: Path = OUTPUT_ROOT) -> int:
         log_event(
             logger,
             "info",
-            f"Book: {input_pdf.name}",
+            f"PDF file: {input_pdf.name}",
             total_pages=total_pages,
             status="start",
         )
@@ -425,7 +425,7 @@ def process_book(input_pdf: Path, output_root: Path = OUTPUT_ROOT) -> int:
 # 7. CLI entrypoint
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Run local OCR on a PDF book and output page-wise markdown files."
+        description="Run local OCR on a PDF file and output page-wise markdown files."
     )
     parser.add_argument("input_pdf", help="Path to the source PDF file")
     return parser
@@ -435,7 +435,7 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
     input_pdf = Path(args.input_pdf).expanduser().resolve()
-    return process_book(input_pdf)
+    return process_pdf(input_pdf)
 
 
 if __name__ == "__main__":

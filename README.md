@@ -1,6 +1,6 @@
-# Book OCR Tool
+# PDF OCR Tool
 
-A local CLI that OCRs a PDF book page-by-page, writes one Markdown file per page, runs Marker first, and falls back to Ollama only when Marker fails on a page.
+A local CLI that OCRs a PDF file page-by-page, writes one Markdown file per page, runs Marker first, and falls back to Ollama only when Marker fails on a page.
 
 ## Install
 
@@ -17,13 +17,13 @@ If `MODEL_CACHE_DIR` is unset, the tool leaves Marker on its default cache locat
 ## Usage
 
 ```bash
-python ocr_tool.py /path/to/book.pdf [--ollama-model deepseek-ocr]
+python ocr_tool.py /path/to/file.pdf [--ollama-model deepseek-ocr]
 ```
 
 To test the fallback path directly without depending on Marker failure:
 
 ```bash
-python ocr_tool.py /path/to/book.pdf --force-ollama-fallback
+python ocr_tool.py /path/to/file.pdf --force-ollama-fallback
 ```
 
 On Windows PowerShell with an override cache path:
@@ -37,7 +37,7 @@ python ocr_tool.py sample.pdf --force-ollama-fallback
 
 ```text
 output/
-  book_name/
+  pdf_name/
     page_0001.md
     page_0002.md
     ...

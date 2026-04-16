@@ -14,7 +14,7 @@ class OcrToolTests(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
-        self.pdf_path = self.root / "book.pdf"
+        self.pdf_path = self.root / "document.pdf"
         self.pdf_path.write_bytes(b"dummy pdf content")
 
     def tearDown(self):
@@ -93,7 +93,7 @@ class OcrToolTests(unittest.TestCase):
         self.assertIn("Marker cache incomplete", log_text)
         self.assertIn("Missing Marker models: layout/2025_09_23", log_text)
 
-    def test_process_book_without_fallback_uses_marker_only(self):
+    def test_process_pdf_without_fallback_uses_marker_only(self):
         output_root = self.root / "out"
 
         def fake_run_ocr(_pdf, page_number, _total_pages, _logger, _ollama_model, force_ollama_fallback=False):
@@ -115,20 +115,20 @@ class OcrToolTests(unittest.TestCase):
             patch("ocr_tool.get_total_pages", return_value=3), \
             patch("ocr_tool.compute_sha256", return_value="abc"), \
             patch("ocr_tool.run_ocr_for_page", side_effect=fake_run_ocr):
-            code = ocr_tool.process_book(self.pdf_path, "deepseek-ocr")
+            code = ocr_tool.process_pdf(self.pdf_path, "deepseek-ocr")
 
         self.assertEqual(code, 0)
 
-        book_dir = output_root / "book"
-        page_1 = (book_dir / "page_0001.md").read_text(encoding="utf-8")
-        page_2 = (book_dir / "page_0002.md").read_text(encoding="utf-8")
-        page_3 = (book_dir / "page_0003.md").read_text(encoding="utf-8")
+        pdf_dir = output_root / "document"
+        page_1 = (pdf_dir / "page_0001.md").read_text(encoding="utf-8")
+        page_2 = (pdf_dir / "page_0002.md").read_text(encoding="utf-8")
+        page_3 = (pdf_dir / "page_0003.md").read_text(encoding="utf-8")
 
         self.assertIn("this is text from page 1", page_1)
         self.assertIn("this is text from page 2", page_2)
         self.assertIn("this is text from page 3", page_3)
 
-        progress = json.loads((book_dir / "progress.json").read_text(encoding="utf-8"))
+        progress = json.loads((pdf_dir / "progress.json").read_text(encoding="utf-8"))
         self.assertEqual(progress["last_completed_page"], 3)
         self.assertEqual(progress["pipeline"], "marker_with_ollama_fallback")
         self.assertEqual(progress["ollama_model"], "deepseek-ocr")
@@ -144,7 +144,7 @@ class OcrToolTests(unittest.TestCase):
         self.assertEqual(progress["pages"]["3"]["final_provider"], "marker")
         self.assertFalse(progress["pages"]["3"]["fallback_used"])
 
-    def test_process_book_with_fallback_records_ollama_recovery(self):
+    def test_process_pdf_with_fallback_records_ollama_recovery(self):
         output_root = self.root / "out"
 
         def fake_run_ocr(_pdf, page_number, _total_pages, _logger, _ollama_model, force_ollama_fallback=False):
@@ -180,15 +180,15 @@ class OcrToolTests(unittest.TestCase):
             patch("ocr_tool.get_total_pages", return_value=3), \
             patch("ocr_tool.compute_sha256", return_value="abc"), \
             patch("ocr_tool.run_ocr_for_page", side_effect=fake_run_ocr):
-            code = ocr_tool.process_book(self.pdf_path, "deepseek-ocr")
+            code = ocr_tool.process_pdf(self.pdf_path, "deepseek-ocr")
 
         self.assertEqual(code, 0)
 
-        book_dir = output_root / "book"
-        page_2 = (book_dir / "page_0002.md").read_text(encoding="utf-8")
+        pdf_dir = output_root / "document"
+        page_2 = (pdf_dir / "page_0002.md").read_text(encoding="utf-8")
         self.assertIn("recovered text from ollama fallback", page_2)
 
-        progress = json.loads((book_dir / "progress.json").read_text(encoding="utf-8"))
+        progress = json.loads((pdf_dir / "progress.json").read_text(encoding="utf-8"))
         self.assertEqual(progress["last_completed_page"], 3)
         self.assertFalse(progress["force_ollama_fallback"])
         self.assertEqual(progress["failed_pages"], [])
@@ -205,7 +205,7 @@ class OcrToolTests(unittest.TestCase):
         self.assertEqual(progress["pages"]["3"]["final_provider"], "marker")
         self.assertFalse(progress["pages"]["3"]["fallback_used"])
 
-    def test_process_book_with_forced_ollama_fallback_skips_marker(self):
+    def test_process_pdf_with_forced_ollama_fallback_skips_marker(self):
         output_root = self.root / "out"
 
         def fake_run_ocr(_pdf, page_number, _total_pages, _logger, _ollama_model, force_ollama_fallback=False):
@@ -230,19 +230,19 @@ class OcrToolTests(unittest.TestCase):
             patch("ocr_tool.get_total_pages", return_value=1), \
             patch("ocr_tool.compute_sha256", return_value="abc"), \
             patch("ocr_tool.run_ocr_for_page", side_effect=fake_run_ocr):
-            code = ocr_tool.process_book(self.pdf_path, "deepseek-ocr", force_ollama_fallback=True)
+            code = ocr_tool.process_pdf(self.pdf_path, "deepseek-ocr", force_ollama_fallback=True)
 
         self.assertEqual(code, 0)
 
-        book_dir = output_root / "book"
-        progress = json.loads((book_dir / "progress.json").read_text(encoding="utf-8"))
+        pdf_dir = output_root / "document"
+        progress = json.loads((pdf_dir / "progress.json").read_text(encoding="utf-8"))
         self.assertTrue(progress["force_ollama_fallback"])
         self.assertEqual(progress["pages"]["1"]["final_provider"], "ollama")
         self.assertTrue(progress["pages"]["1"]["fallback_used"])
         self.assertEqual(progress["pages"]["1"]["attempts"][0]["status"], "skipped")
         self.assertEqual(progress["pages"]["1"]["attempts"][1]["provider"], "ollama")
 
-    def test_process_book_aborts_when_page_count_fails(self):
+    def test_process_pdf_aborts_when_page_count_fails(self):
         output_root = self.root / "out"
 
         with patch("ocr_tool.OUTPUT_ROOT", output_root), \
@@ -251,7 +251,7 @@ class OcrToolTests(unittest.TestCase):
             patch("ocr_tool.validate_environment", return_value=None), \
             patch("ocr_tool.get_total_pages", side_effect=RuntimeError("page count failed")), \
             patch("ocr_tool.run_ocr_for_page") as run_ocr:
-            code = ocr_tool.process_book(self.pdf_path, "deepseek-ocr")
+            code = ocr_tool.process_pdf(self.pdf_path, "deepseek-ocr")
 
         self.assertEqual(code, 1)
         run_ocr.assert_not_called()
