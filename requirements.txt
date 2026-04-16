@@ -1,4 +1,5 @@
-﻿marker-pdf
+marker-pdf
 pypdf
 tqdm
 python-json-logger
+python-dotenv
