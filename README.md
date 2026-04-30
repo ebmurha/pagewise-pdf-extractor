@@ -1,56 +1,58 @@
 # pagewise-pdf-extractor
 
-Standalone Python package for converting PDFs into one Markdown file per page with structured metadata, atomic progress tracking, and provider-level observability.
+Page-wise PDF to Markdown extraction with text extraction, OCR, LLM fallback, and progress metadata.
 
-It handles text-native PDFs through PyMuPDF, scanned pages through Marker, and optional Ollama vision fallback when OCR fails.
+`pagewise-pdf-extractor` is a Python package and CLI for converting PDFs into deterministic page-level Markdown files. It routes each page through embedded-text extraction, scanned-page OCR, and optional vision-model fallback, then returns structured results for RAG and document-processing pipelines.
+
+## What It Does
+
+- Extracts text-native PDF pages with PyMuPDF.
+- Extracts scanned/image pages with Marker.
+- Falls back to Ollama vision OCR when configured OCR fails.
+- Writes one UTF-8 Markdown file per page.
+- Writes atomic `progress.json` with provider attempts, status, config hash, source hash, and page metadata.
+- Exposes a library API for applications and a CLI for operators.
+- Keeps local processing as the default; remote services are only used if explicitly configured.
+
+## Status
+
+`v0.1.0` is the first valid integration release. The public API is intended for early downstream use by `rag-engine` and similar applications, but the project is still pre-`1.0`.
 
 ## Install
 
-Development install:
+Pinned Git dependency:
 
-```powershell
-pip install -e D:\Developer\Projects\pagewise-pdf-extractor
+```txt
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
 ```
 
-Runtime dependencies are declared in `pyproject.toml`. External tools are still required for OCR paths:
+Local development:
+
+```powershell
+python -m pip install -e D:\Developer\Projects\pagewise-pdf-extractor
+```
+
+Runtime dependencies are declared in `pyproject.toml`. OCR providers also require local binaries:
 
 - `marker_single` for Marker OCR
 - `ollama` for Ollama fallback
 - `pdftoppm` for rendering pages passed to Ollama
 
-Developer documentation:
+Check the local environment:
 
-- [API reference](docs/API.md)
-- [Configuration reference](docs/CONFIGURATION.md)
-- [Environment and provider setup](docs/ENVIRONMENT.md)
-- [Integration guide](docs/INTEGRATION.md)
-- [Packaging and naming guide](docs/PACKAGING.md)
-- [Release process](docs/RELEASE.md)
-- [Changelog](CHANGELOG.md)
+```powershell
+pagewise-pdf-extractor --validate-environment
+```
 
-## CLI Usage
+## Quickstart
+
+CLI:
 
 ```powershell
 pagewise-pdf-extractor document.pdf --output-root output
 ```
 
-Useful flags:
-
-```powershell
-pagewise-pdf-extractor document.pdf --force-ocr
-pagewise-pdf-extractor document.pdf --force-fallback --ollama-model deepseek-ocr
-pagewise-pdf-extractor document.pdf --marker-model-cache-dir D:\DevTools\marker-model-cache
-pagewise-pdf-extractor --validate-environment
-```
-
-Exit codes:
-
-- `0`: completed, including partial page failures
-- `1`: startup or fatal failure
-- `2`: invalid input
-- `130`: interrupted
-
-## Library Usage
+Python:
 
 ```python
 from pathlib import Path
@@ -76,7 +78,7 @@ result = process_pdf(
 )
 ```
 
-The public import contract is:
+Public import contract:
 
 ```python
 from pagewise_pdf_extractor import (
@@ -87,21 +89,9 @@ from pagewise_pdf_extractor import (
 )
 ```
 
-## Provider Behavior
+## Output
 
-Default page-level routing:
-
-1. Try embedded text extraction with PyMuPDF.
-2. Accept embedded text when it meets `min_text_chars` and basic cleanliness checks.
-3. Use Marker OCR when embedded text is absent, low quality, or `force_ocr=True`.
-4. Use Ollama fallback when Marker fails or returns unusable output and fallback is enabled.
-5. Write failure Markdown for a page if all configured providers fail.
-
-Local providers are the default. Document content is not sent to remote services unless you configure a provider endpoint that does so.
-
-## Output Layout
-
-The caller controls `output_root`. By default each source PDF writes under its SHA-256 hash, so same-stem PDFs from different folders do not collide:
+Default layout:
 
 ```text
 output/
@@ -111,15 +101,7 @@ output/
     progress.json
 ```
 
-Set `ExtractionConfig(separate_runs=True)` or `--separate-runs` to write under:
-
-```text
-output/<input_sha256>/<run_id>/
-```
-
-## Markdown Contract
-
-Success:
+Successful page:
 
 ```markdown
 # Page N
@@ -127,7 +109,7 @@ Success:
 <provider markdown content>
 ```
 
-Failure:
+Failed page:
 
 ```markdown
 # Page N
@@ -137,39 +119,28 @@ OCR FAILED
 Error: <error_message>
 ```
 
-Page files are UTF-8. Empty provider output is rejected as a failed/low-quality attempt.
+## Provider Routing
 
-## progress.json
+Default page-level routing:
 
-`progress.json` is written after startup validation and after every page. It is written atomically with a run-specific temp file.
+1. Try embedded text extraction with PyMuPDF.
+2. Accept embedded text when it meets configured quality thresholds.
+3. Use Marker OCR when embedded text is absent, low quality, or `force_ocr=True`.
+4. Use Ollama fallback when Marker fails or returns unusable output and fallback is enabled.
+5. Write failure Markdown if all configured providers fail.
 
-Top-level fields include:
+## Documentation
 
-- `schema_version`
-- `extractor_version`
-- `input_file`
-- `input_file_name`
-- `input_sha256`
-- `total_pages`
-- `pipeline`
-- `config_hash`
-- `config_used`
-- `run_id`
-- `started_at`
-- `updated_at`
-- `completed_at`
-- `status`
-- `last_completed_page`
-- `failed_pages`
-- `pages`
-
-Each page record includes status, character count, duration, output file, final provider, fallback flag, attempts, and error when failed.
-
-## Resume and Concurrency
-
-Resume is enabled by default when `progress.json` matches source path, source hash, page count, extractor version, schema version, and config hash. Mismatches start a clean baseline for that output directory.
-
-Concurrent extractions of different PDFs are safe when given the same `output_root` because outputs are SHA-256 isolated. The package creates an exclusive `.pagewise-extractor.lock` in the resolved output directory, so concurrent extractions of the same PDF/output directory fail fast with `ConcurrencyError`. Use `separate_runs=True` or distinct run-scoped output directories when same-PDF parallelism is needed.
+- [API reference](docs/API.md)
+- [Configuration reference](docs/CONFIGURATION.md)
+- [Environment and provider setup](docs/ENVIRONMENT.md)
+- [Integration guide](docs/INTEGRATION.md)
+- [Packaging and naming guide](docs/PACKAGING.md)
+- [Release process](docs/RELEASE.md)
+- [Changelog](CHANGELOG.md)
+- [Release notes](docs/releases/v0.1.0.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security](SECURITY.md)
 
 ## Tests
 
@@ -179,23 +150,6 @@ python -c "from pagewise_pdf_extractor import ExtractionConfig, process_pdf, val
 pagewise-pdf-extractor --help
 ```
 
-## Manual Release Steps
-
-The package name is currently implemented as:
-
-- distribution: `pagewise-pdf-extractor`
-- import: `pagewise_pdf_extractor`
-
-Manual steps before external consumption:
-
-- confirm the package name
-- rename/update the GitHub repository if needed
-- tag a known-good commit, for example `v0.1.0`
-- have `rag-engine` pin the GitHub dependency to that tag or commit SHA
-- publish to PyPI later only after the public API stabilizes
-
-The collaborator release workflow is documented in [docs/RELEASE.md](docs/RELEASE.md).
-
 ## Future Goals
 
-This repository is expected to continue as a standalone PDF extraction package. Future work should preserve the public API, keep provider behavior explicit, and add new providers or extraction quality improvements behind documented configuration.
+Future work should preserve the public API, keep provider behavior explicit, and add new providers or extraction quality improvements behind documented configuration.

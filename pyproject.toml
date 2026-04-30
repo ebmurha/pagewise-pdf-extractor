@@ -5,12 +5,33 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pagewise-pdf-extractor"
 version = "0.1.0"
-description = "Convert PDFs into page-wise Markdown with metadata, progress tracking, and OCR fallback."
+description = "Page-wise PDF to Markdown extraction with text extraction, OCR, LLM fallback, and progress metadata."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [{ name = "pagewise-pdf-extractor maintainers" }]
+keywords = [
+  "pdf",
+  "pdf-extraction",
+  "ocr",
+  "markdown",
+  "rag",
+  "pymupdf",
+  "marker",
+  "ollama",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Text Processing",
+  "Topic :: Utilities",
+]
 dependencies = [
   "marker-pdf",
   "pypdf",
@@ -23,6 +44,13 @@ dependencies = [
 
 [project.scripts]
 pagewise-pdf-extractor = "pagewise_pdf_extractor.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/ebmurha/pagewise-pdf-extractor"
+Repository = "https://github.com/ebmurha/pagewise-pdf-extractor"
+Documentation = "https://github.com/ebmurha/pagewise-pdf-extractor/tree/main/docs"
+Issues = "https://github.com/ebmurha/pagewise-pdf-extractor/issues"
+Changelog = "https://github.com/ebmurha/pagewise-pdf-extractor/blob/main/CHANGELOG.md"
 
 [tool.setuptools.packages.find]
 where = ["src"]
