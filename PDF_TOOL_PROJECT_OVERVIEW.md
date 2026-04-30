@@ -155,7 +155,7 @@ pip install -e D:\Developer\Projects\pagewise-pdf-extractor
 Pinned GitHub dependency after tagging:
 
 ```text
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.1
 ```
 
 Manual release work still required:
@@ -168,3 +168,8 @@ Operational details are documented in:
 
 - `docs/PACKAGING.md`
 - `docs/RELEASE.md`
+- `docs/API.md`
+- `docs/CONFIGURATION.md`
+- `docs/ENVIRONMENT.md`
+- `docs/INTEGRATION.md`
+- `CHANGELOG.md`

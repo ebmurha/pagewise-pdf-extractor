@@ -18,7 +18,15 @@ Runtime dependencies are declared in `pyproject.toml`. External tools are still 
 - `ollama` for Ollama fallback
 - `pdftoppm` for rendering pages passed to Ollama
 
-See [docs/PACKAGING.md](docs/PACKAGING.md) for naming, installation, and dependency-check guidance.
+Developer documentation:
+
+- [API reference](docs/API.md)
+- [Configuration reference](docs/CONFIGURATION.md)
+- [Environment and provider setup](docs/ENVIRONMENT.md)
+- [Integration guide](docs/INTEGRATION.md)
+- [Packaging and naming guide](docs/PACKAGING.md)
+- [Release process](docs/RELEASE.md)
+- [Changelog](CHANGELOG.md)
 
 ## CLI Usage
 
@@ -182,7 +190,7 @@ Manual steps before external consumption:
 
 - confirm the package name
 - rename/update the GitHub repository if needed
-- tag a known-good commit, for example `v0.1.0`
+- tag a known-good commit, for example `v0.1.1`
 - have `rag-engine` pin the GitHub dependency to that tag or commit SHA
 - publish to PyPI later only after the public API stabilizes
 

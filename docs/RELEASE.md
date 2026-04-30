@@ -10,7 +10,7 @@ Use semantic versioning and immutable Git tags:
 - Minor release: backward-compatible features, for example `0.2.0`
 - Major release: breaking public API changes, for example `1.0.0`
 
-Before the API is stable, use `0.x.y` versions. For `rag-engine`, prefer a release tag such as `v0.1.0` over a raw commit SHA once the first integration build is accepted.
+Before the API is stable, use `0.x.y` versions. For `rag-engine`, prefer a release tag such as `v0.1.1` over a raw commit SHA once the first integration build is accepted.
 
 ## Pre-Release Checklist
 
@@ -35,8 +35,13 @@ Before the API is stable, use `0.x.y` versions. For `rag-engine`, prefer a relea
 
    - `README.md`
    - `PDF_TOOL_PROJECT_OVERVIEW.md`
+   - `docs/API.md`
+   - `docs/CONFIGURATION.md`
+   - `docs/ENVIRONMENT.md`
+   - `docs/INTEGRATION.md`
    - `docs/PACKAGING.md`
    - `docs/RELEASE.md`
+   - `CHANGELOG.md`
 
 6. Commit the release-ready state.
 
@@ -45,8 +50,8 @@ Before the API is stable, use `0.x.y` versions. For `rag-engine`, prefer a relea
 Use an annotated tag:
 
 ```powershell
-git tag -a v0.1.0 -m "Release v0.1.0"
-git push origin v0.1.0
+git tag -a v0.1.1 -m "Release v0.1.1"
+git push origin v0.1.1
 ```
 
 Annotated tags are preferred for public collaborator workflows because they carry release metadata and are clearer than lightweight tags.
@@ -56,7 +61,7 @@ Annotated tags are preferred for public collaborator workflows because they carr
 For `rag-engine`, pin to the tag:
 
 ```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.1
 ```
 
 During pre-release validation, pinning to a commit SHA is acceptable:
