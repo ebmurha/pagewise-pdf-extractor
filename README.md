@@ -190,7 +190,7 @@ Manual steps before external consumption:
 
 - confirm the package name
 - rename/update the GitHub repository if needed
-- tag a known-good commit, for example `v0.1.2`
+- tag a known-good commit, for example `v0.1.0`
 - have `rag-engine` pin the GitHub dependency to that tag or commit SHA
 - publish to PyPI later only after the public API stabilizes
 

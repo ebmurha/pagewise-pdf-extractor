@@ -19,7 +19,7 @@ python -m pip install -e D:\Developer\Projects\pagewise-pdf-extractor
 Pinned GitHub install:
 
 ```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.2
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
 ```
 
 ## Validate Environment

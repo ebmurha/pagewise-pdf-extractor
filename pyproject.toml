@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pagewise-pdf-extractor"
-version = "0.1.2"
+version = "0.1.0"
 description = "Convert PDFs into page-wise Markdown with metadata, progress tracking, and OCR fallback."
 readme = "README.md"
 requires-python = ">=3.10"

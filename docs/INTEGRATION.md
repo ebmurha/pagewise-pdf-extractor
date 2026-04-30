@@ -7,7 +7,7 @@ This document describes how downstream applications such as `rag-engine` should 
 Use a pinned tag:
 
 ```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.2
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
 ```
 
 Do not depend on `main`.
