@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pagewise-pdf-extractor"
+version = "0.1.0"
+description = "Convert PDFs into page-wise Markdown with metadata, progress tracking, and OCR fallback."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "pagewise-pdf-extractor maintainers" }]
+dependencies = [
+  "marker-pdf",
+  "pypdf",
+  "PyMuPDF",
+  "tqdm",
+  "python-json-logger",
+  "python-dotenv",
+  "platformdirs",
+]
+
+[project.scripts]
+pagewise-pdf-extractor = "pagewise_pdf_extractor.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

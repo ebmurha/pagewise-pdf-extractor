@@ -1,222 +1,170 @@
-# OCR Tool Project Overview
+# PDF Tool Project Overview
 
-## 1. Folder and File Structure
+## Current Shape
 
-Current tracked project files:
+The project is now an installable package:
 
 ```text
-ocr-tool/
-  .aiignore
-  .env
-  .env.example
-  .gitignore
+pagewise-pdf-extractor/
+  pyproject.toml
+  LICENSE
   README.md
-  ocr_providers.py
-  ocr_tool.py
-  pdf_ocr_marker.py
-  requirements.txt
-  output/
+  implementation-plan.md
+  src/
+    pagewise_pdf_extractor/
+      __init__.py
+      api.py
+      cli.py
+      config.py
+      environment.py
+      exceptions.py
+      markdown.py
+      models.py
+      progress.py
+      providers/
+        base.py
+        pymupdf_text.py
+        marker_ocr.py
+        ollama_vision.py
   tests/
-    test_ocr_tool.py
-    test_pdf_ocr_marker.py
 ```
 
-Main files:
+Legacy `ocr_tool.py` and `pdf_ocr_marker.py` remain only as compatibility wrappers. New integrations should import `pagewise_pdf_extractor` or use the `pagewise-pdf-extractor` CLI.
 
-- `ocr_tool.py`: current main OCR pipeline. It runs Marker first and falls back to Ollama per page.
-- `ocr_providers.py`: provider implementations for Marker, Ollama, PDF page counting, environment checks, and model cache inspection.
-- `pdf_ocr_marker.py`: older/simple Marker-only OCR pipeline.
-- `tests/`: unit tests for both pipelines.
-- `output/`: generated OCR output root. Each processed PDF gets its own subfolder here.
-
-## 2. Inputs
-
-The current main pipeline takes a single PDF file path as its required input:
-
-```bash
-python ocr_tool.py /path/to/file.pdf
-```
-
-It does not take a folder of PDFs. It processes one PDF at a time.
-
-Optional CLI inputs:
-
-```bash
-python ocr_tool.py /path/to/file.pdf --ollama-model deepseek-ocr
-python ocr_tool.py /path/to/file.pdf --force-ollama-fallback
-```
-
-Configuration:
-
-- `.env` is loaded if present.
-- `.env.example` documents the optional `MODEL_CACHE_DIR` setting.
-- `MODEL_CACHE_DIR` controls where Marker/Surya model files are cached.
-- If `MODEL_CACHE_DIR` is unset, Marker uses its default cache location.
-
-Environment/tooling inputs:
-
-- `marker_single` must be on `PATH` for Marker OCR.
-- `ollama` must be on `PATH` for fallback OCR.
-- `pdftoppm` must be on `PATH` for Ollama fallback because the PDF page is rendered to PNG first.
-
-## 3. Outputs
-
-The main output location is:
-
-```text
-output/<pdf_stem>/
-```
-
-For example, processing `document.pdf` writes to:
-
-```text
-output/document/
-  page_0001.md
-  page_0002.md
-  page_0003.md
-  progress.json
-  run.log
-```
-
-Page Markdown naming convention:
-
-```text
-page_<4-digit-page-number>.md
-```
-
-Examples:
-
-- `page_0001.md`
-- `page_0002.md`
-- `page_0010.md`
-
-Successful page Markdown content looks like:
-
-```markdown
-# Page 1
-
-<OCR markdown content from Marker or Ollama>
-```
-
-Failed page Markdown content looks like:
-
-```markdown
-# Page 2
-
-OCR FAILED
-
-Error: Marker and Ollama both failed for page 2.
-```
-
-Metadata/progress file:
-
-- `progress.json` is written alongside the page Markdown files.
-- It records the input PDF path, filename, SHA-256 hash, page count, completed page, failed pages, pipeline mode, Ollama model, force-fallback flag, and per-page status.
-
-Representative `progress.json` shape:
-
-```json
-{
-  "input_file": "D:\\path\\to\\document.pdf",
-  "input_file_name": "document.pdf",
-  "input_sha256": "<sha256>",
-  "total_pages": 3,
-  "last_completed_page": 3,
-  "failed_pages": [],
-  "pages": {
-    "1": {
-      "status": "ok",
-      "characters": 1234,
-      "duration_seconds": 4.321,
-      "output_file": "page_0001.md",
-      "processed_at": "2026-04-29T00:00:00+00:00",
-      "final_provider": "marker",
-      "fallback_used": false,
-      "attempts": [
-        {
-          "provider": "marker",
-          "status": "ok",
-          "characters": 1234
-        }
-      ]
-    }
-  },
-  "pipeline": "marker_with_ollama_fallback",
-  "ollama_model": "deepseek-ocr",
-  "force_ollama_fallback": false,
-  "updated_at": "2026-04-29T00:00:00+00:00"
-}
-```
-
-Log file:
-
-- `run.log` is written alongside the output.
-- It contains terminal-style progress events and structured fields such as page number, total pages, duration, character count, and status.
-
-## 4. Invocation
-
-Primary CLI:
-
-```bash
-python ocr_tool.py /path/to/file.pdf
-```
-
-With explicit Ollama fallback model:
-
-```bash
-python ocr_tool.py /path/to/file.pdf --ollama-model deepseek-ocr
-```
-
-Force the Ollama fallback path for every page:
-
-```bash
-python ocr_tool.py /path/to/file.pdf --force-ollama-fallback
-```
-
-The code can also be imported from Python. The main callable is:
+## Public API
 
 ```python
-from pathlib import Path
-from ocr_tool import process_pdf
-
-exit_code = process_pdf(
-    Path("document.pdf"),
-    ollama_model="deepseek-ocr",
-    force_ollama_fallback=False,
+from pagewise_pdf_extractor import (
+    ExtractionConfig,
+    ExtractionResult,
+    process_pdf,
+    validate_environment,
 )
 ```
 
-The older Marker-only pipeline can be invoked as:
-
-```bash
-python pdf_ocr_marker.py /path/to/file.pdf
-```
-
-And imported as:
+Primary call:
 
 ```python
-from pathlib import Path
-from pdf_ocr_marker import process_pdf
-
-exit_code = process_pdf(Path("document.pdf"))
+result = process_pdf(
+    input_pdf=pdf_path,
+    output_root=work_dir / "extracted",
+    config=ExtractionConfig(),
+)
 ```
 
-## 5. Dependencies
+`process_pdf()` returns an `ExtractionResult` with input path, output directory, progress path, extractor version, source hash, total pages, page results, failed pages, run ID, schema version, config hash, and resolved config.
 
-Python dependencies in `requirements.txt`:
+## Extraction Pipeline
+
+Routing is per page:
+
+1. PyMuPDF extracts embedded text unless `force_ocr` or `force_fallback` is set.
+2. Text is accepted when it meets quality thresholds.
+3. Marker OCR handles pages without usable embedded text.
+4. Ollama fallback handles Marker failure or unusable OCR output when fallback is enabled.
+5. Page-level failures write failure Markdown and are recorded without aborting the whole document by default.
+
+Provider attempts are recorded with provider name, status, character count, duration, error, and metadata.
+
+## Configuration
+
+`ExtractionConfig` supports:
+
+- provider selection
+- fallback enable/disable
+- forced OCR/fallback modes
+- text/OCR quality thresholds
+- Marker model cache directory
+- Ollama model, endpoint, prompt, and render DPI
+- fail-fast and resume behavior
+- per-run output isolation
+
+Environment variables are limited to appropriate external provider defaults such as `MODEL_CACHE_DIR`, `OLLAMA_ENDPOINT`, and `OLLAMA_MODEL`.
+
+## Output
+
+The caller controls `output_root`. Default output directory:
 
 ```text
-marker-pdf
-pypdf
-tqdm
-python-json-logger
-python-dotenv
+<output_root>/<input_sha256>/
 ```
 
-External command-line dependencies used by the current pipeline:
+Optional isolated run directory:
 
-- `marker_single`: installed/provided by `marker-pdf`.
-- `ollama`: used for fallback OCR.
-- `pdftoppm`: used to render individual PDF pages to PNG for Ollama fallback.
+```text
+<output_root>/<input_sha256>/<run_id>/
+```
 
-There is no `pyproject.toml` in the current project.
+Page Markdown files use:
+
+```text
+page_0001.md
+page_0002.md
+```
+
+Success pages:
+
+```markdown
+# Page N
+
+<content>
+```
+
+Failure pages:
+
+```markdown
+# Page N
+
+OCR FAILED
+
+Error: <error_message>
+```
+
+## progress.json
+
+`progress.json` is versioned with `schema_version` and `extractor_version`. It stores source identity, page count, pipeline, config hash, resolved config, run ID, status timestamps, failed pages, and page records.
+
+Progress is written before page 1 after startup validation succeeds, then after every page success/failure, then at completion or interruption.
+
+## Dependency Validation
+
+`validate_environment(config)` reports provider availability, missing Python packages, missing binaries, degraded capabilities, fatal blockers, and a summary.
+
+Relevant external binaries:
+
+- `marker_single`
+- `ollama`
+- `pdftoppm`
+
+Forced fallback fails fast when Ollama tooling is missing. Forced OCR fails fast when Marker is missing. Text-native extraction validates PyMuPDF.
+
+## Concurrency
+
+Different PDFs do not collide because output directories are SHA-256 based. A `.pagewise-extractor.lock` file prevents concurrent runs from sharing the same resolved output directory. For concurrent runs of the same PDF, use `separate_runs=True` or distinct run-scoped output directories.
+
+Atomic progress writes use run-specific temp filenames.
+
+## Package Consumption
+
+Local development:
+
+```powershell
+pip install -e D:\Developer\Projects\pagewise-pdf-extractor
+```
+
+Pinned GitHub dependency after tagging:
+
+```text
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
+```
+
+Manual release work still required:
+
+- confirm package name
+- create a release tag or commit SHA for `rag-engine`
+- publish to PyPI later only if desired
+
+Operational details are documented in:
+
+- `docs/PACKAGING.md`
+- `docs/RELEASE.md`

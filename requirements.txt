@@ -1,5 +1,7 @@
 marker-pdf
 pypdf
+PyMuPDF
 tqdm
 python-json-logger
 python-dotenv
+platformdirs
