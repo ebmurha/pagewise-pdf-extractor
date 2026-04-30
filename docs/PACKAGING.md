@@ -77,7 +77,7 @@ Package metadata lives in `pyproject.toml`.
 
 Current release identity:
 
-- version: `0.1.1`
+- version: `0.1.2`
 - license: `MIT`
 - CLI entrypoint: `pagewise-pdf-extractor = "pagewise_pdf_extractor.cli:main"`
 

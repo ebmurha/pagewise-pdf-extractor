@@ -24,6 +24,9 @@ progress.json
 # Output from OCR runs
 output/
 
+# Archived handoff/planning documents
+archive/
+
 # Jupyter notebooks
 .ipynb_checkpoints/
 

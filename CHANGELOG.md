@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.1.2
+
+- Removed legacy root-level script shims and duplicate dependency files.
+- Archived implementation handoff documents outside tracked package documentation.
+- Kept developer-facing package documentation as the maintainer source of truth.
+
 ## v0.1.1
 
 - Added developer-facing package documentation:

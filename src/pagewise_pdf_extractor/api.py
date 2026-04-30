@@ -36,7 +36,7 @@ from .providers.marker_ocr import MarkerOCRExtractor
 from .providers.ollama_vision import OllamaVisionExtractor
 from .providers.pymupdf_text import PyMuPDFTextExtractor
 
-EXTRACTOR_VERSION = "0.1.1"
+EXTRACTOR_VERSION = "0.1.2"
 
 
 def process_pdf(

@@ -15,7 +15,7 @@ from pagewise_pdf_extractor import (
 )
 ```
 
-Do not import from legacy modules such as `ocr_tool.py`, `pdf_ocr_marker.py`, or `ocr_providers.py`.
+Do not import from repository-root scripts or private provider modules. The public package import is the supported API boundary.
 
 ## process_pdf
 

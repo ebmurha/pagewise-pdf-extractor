@@ -190,8 +190,12 @@ Manual steps before external consumption:
 
 - confirm the package name
 - rename/update the GitHub repository if needed
-- tag a known-good commit, for example `v0.1.1`
+- tag a known-good commit, for example `v0.1.2`
 - have `rag-engine` pin the GitHub dependency to that tag or commit SHA
 - publish to PyPI later only after the public API stabilizes
 
 The collaborator release workflow is documented in [docs/RELEASE.md](docs/RELEASE.md).
+
+## Future Goals
+
+This repository is expected to continue as a standalone PDF extraction package. Future work should preserve the public API, keep provider behavior explicit, and add new providers or extraction quality improvements behind documented configuration.
