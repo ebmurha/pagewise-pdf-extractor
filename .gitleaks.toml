@@ -23,6 +23,7 @@ paths = [
   '''(^|/)\.nox/''',
   '''(^|/)htmlcov/''',
   '''\.log$''',
+  '''(^|/)gitleaks-reports?\.json$''',
   '''\.pdf$''',
   '''\.safetensors$''',
   '''\.bin$''',
