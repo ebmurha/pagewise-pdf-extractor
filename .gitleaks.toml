@@ -1,0 +1,30 @@
+title = "pagewise-pdf-extractor gitleaks config"
+
+[allowlist]
+description = "Skip generated artifacts, local environments, caches, and binary inputs that are not intended for public release."
+paths = [
+  '''(^|/)venv/''',
+  '''(^|/)\.venv/''',
+  '''(^|/)env/''',
+  '''(^|/)ENV/''',
+  '''(^|/)__pycache__/''',
+  '''(^|/)build/''',
+  '''(^|/)dist/''',
+  '''(^|/)output/''',
+  '''(^|/)archive/''',
+  '''(^|/)local-docs/''',
+  '''(^|/)model-cache/''',
+  '''(^|/)marker-model-cache/''',
+  '''(^|/)\.model-cache/''',
+  '''(^|/)\.pytest_cache/''',
+  '''(^|/)\.ruff_cache/''',
+  '''(^|/)\.mypy_cache/''',
+  '''(^|/)\.tox/''',
+  '''(^|/)\.nox/''',
+  '''(^|/)htmlcov/''',
+  '''\.log$''',
+  '''\.pdf$''',
+  '''\.safetensors$''',
+  '''\.bin$''',
+  '''\.pt$''',
+]

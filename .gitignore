@@ -18,6 +18,8 @@ pagewise_pdf_extractor-*/
 
 # Logs
 *.log
+gitleaks-report.json
+gitleaks-reports.json
 
 # Progress / runtime files
 progress.json
