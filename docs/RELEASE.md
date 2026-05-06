@@ -1,89 +1,53 @@
-# Release Process
+# Releases and Versioning
 
-This project is intended to be consumed by other repositories as a normal Python dependency. Consumers must pin to an immutable version, tag, or commit.
+This package is versioned so applications can depend on a specific, reproducible build.
 
-## Best Practice
+## Current Release
 
-Use semantic versioning and immutable Git tags:
+The current documented release is `v0.1.0`.
 
-- Patch release: bug fixes that do not change the public API, for example `0.1.1`
-- Minor release: backward-compatible features, for example `0.2.0`
-- Major release: breaking public API changes, for example `1.0.0`
+`0.1.0` is an early integration release. The package is usable by downstream applications, but the public API may still change before `1.0.0`.
 
-Before the API is stable, use `0.x.y` versions. For `rag-engine`, prefer a release tag such as `v0.1.0` over a raw commit SHA once the first integration build is accepted.
+## Version Numbers
 
-## Pre-Release Checklist
+Versions follow semantic versioning:
 
-1. Confirm `pyproject.toml` version.
-2. Confirm `pagewise_pdf_extractor.__version__` reports the same version.
-3. Run tests:
+- Patch versions, such as `0.1.1`, contain fixes that should not change the public API.
+- Minor versions, such as `0.2.0`, may add backward-compatible features.
+- Major versions, such as `1.0.0`, may include breaking API changes.
 
-   ```powershell
-   python -m unittest discover -s tests -p "test_*.py"
-   ```
+Before `1.0.0`, minor versions may still include API adjustments. Pin exact versions or use a lockfile for production workloads.
 
-4. Run install and CLI smoke checks:
+## Installing a Release
 
-   ```powershell
-   python -m pip install -e .
-   python -c "from pagewise_pdf_extractor import ExtractionConfig, process_pdf, validate_environment; print('ok')"
-   pagewise-pdf-extractor --help
-   pagewise-pdf-extractor --validate-environment
-   ```
-
-5. Verify docs:
-
-   - `README.md`
-   - `docs/API.md`
-   - `docs/CONFIGURATION.md`
-   - `docs/ENVIRONMENT.md`
-   - `docs/INTEGRATION.md`
-   - `docs/PACKAGING.md`
-   - `docs/RELEASE.md`
-   - `CHANGELOG.md`
-
-6. Commit the release-ready state.
-
-## Create a Tag
-
-Use an annotated tag:
+From PyPI when available:
 
 ```powershell
-git tag -a v0.1.0 -m "Release v0.1.0"
-git push origin v0.1.0
+python -m pip install pagewise-pdf-extractor==0.1.0
 ```
 
-Annotated tags are preferred for public collaborator workflows because they carry release metadata and are clearer than lightweight tags.
-
-## Dependency Pinning
-
-For `rag-engine`, pin to the tag:
+From GitHub:
 
 ```txt
 pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
 ```
 
-During pre-release validation, pinning to a commit SHA is acceptable:
+Avoid depending on `main`. Branches move, which makes installs non-reproducible.
 
-```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@<commit-sha>
+## Compatibility Expectations
+
+The supported public API is exported from `pagewise_pdf_extractor`:
+
+```python
+from pagewise_pdf_extractor import ExtractionConfig, process_pdf, validate_environment
 ```
 
-Do not pin a consumer to `main`. Branches move, which makes builds non-reproducible.
+Imports from internal modules, provider implementations, or repository scripts are not part of the compatibility contract.
 
-## PyPI Publication
+## Release Notes
 
-PyPI publication is optional until the public API stabilizes. When publishing later:
+- [v0.1.0](releases/v0.1.0.md)
 
-1. Build artifacts from a clean checkout.
-2. Upload to TestPyPI first if needed.
-3. Upload to PyPI.
-4. Create a matching GitHub release for the same tag.
+Check the changelog for package-level changes across releases:
 
-Consumers can then use:
-
-```txt
-pagewise-pdf-extractor>=0.1.0
-```
-
-Consumer repositories should still choose an explicit upper bound or lockfile according to their dependency policy.
+- [Changelog](../CHANGELOG.md)

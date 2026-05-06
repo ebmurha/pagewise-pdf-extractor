@@ -14,6 +14,7 @@ build/
 dist/
 *.egg-info/
 .eggs/
+pagewise_pdf_extractor-*/
 
 # Logs
 *.log
@@ -48,8 +49,21 @@ Thumbs.db
 .python-version
 .env
 .env.*
+!.env.example
 
 # Coverage / testing
 .coverage
+coverage.xml
 htmlcov/
 .pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+.nox/
+
+# Local provider/model caches
+model-cache/
+marker-model-cache/
+.model-cache/
+
+local-docs/

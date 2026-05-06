@@ -37,7 +37,7 @@ Provider attempts rejected by thresholds are recorded as `low_quality`.
 ## Marker Settings
 
 ```python
-ExtractionConfig(marker_model_cache_dir=Path("D:/DevTools/marker-model-cache"))
+ExtractionConfig(marker_model_cache_dir=Path("path/to/marker-model-cache"))
 ```
 
 If unset, Marker uses its normal cache behavior. On a cold cache, Marker may download models during the first OCR run.
@@ -71,4 +71,4 @@ Resume only applies when source path, source hash, page count, extractor version
 - `OLLAMA_ENDPOINT`
 - `OLLAMA_MODEL`
 
-Prefer explicit config in applications. Environment variables are useful for CLI and local operations.
+Prefer explicit config in applications. Environment variables are useful for CLI use.

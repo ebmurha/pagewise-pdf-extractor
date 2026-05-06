@@ -10,3 +10,8 @@
 
 - [ ] README/docs updated if behavior changed
 - [ ] CHANGELOG updated if user-facing behavior changed
+
+## Safety
+
+- [ ] No secrets committed
+- [ ] Generated artifacts not committed

@@ -16,9 +16,15 @@ Page-wise PDF to Markdown extraction with text extraction, OCR, LLM fallback, an
 
 ## Status
 
-`v0.1.0` is the first valid integration release. The public API is intended for early downstream use by `rag-engine` and similar applications, but the project is still pre-`1.0`.
+`v0.1.0` is the first valid integration release. The public API is intended for early downstream use by applications that need page-wise PDF extraction, but the project is still pre-`1.0`.
 
 ## Install
+
+From PyPI after publication:
+
+```powershell
+python -m pip install pagewise-pdf-extractor
+```
 
 Pinned Git dependency:
 
@@ -136,7 +142,7 @@ Default page-level routing:
 - [Environment and provider setup](docs/ENVIRONMENT.md)
 - [Integration guide](docs/INTEGRATION.md)
 - [Packaging and naming guide](docs/PACKAGING.md)
-- [Release process](docs/RELEASE.md)
+- [Releases and versioning](docs/RELEASE.md)
 - [Changelog](CHANGELOG.md)
 - [Release notes](docs/releases/v0.1.0.md)
 - [Contributing](CONTRIBUTING.md)

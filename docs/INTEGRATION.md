@@ -1,6 +1,6 @@
 # Integration Guide
 
-This document describes how downstream applications such as `rag-engine` should consume the package.
+This document describes how applications can consume the package.
 
 ## Dependency Declaration
 

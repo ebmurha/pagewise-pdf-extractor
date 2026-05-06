@@ -4,16 +4,10 @@ This package separates Python installation from external OCR tooling. Text-nativ
 
 ## Install Python Package
 
-Development install:
+From PyPI when available:
 
 ```powershell
-python -m pip install -e .
-```
-
-Consumer repo local install:
-
-```powershell
-python -m pip install -e D:\Developer\Projects\pagewise-pdf-extractor
+python -m pip install pagewise-pdf-extractor
 ```
 
 Pinned GitHub install:
@@ -63,9 +57,9 @@ Ollama fallback:
 - Binary on `PATH`: `pdftoppm`
 - Local Ollama model available, for example `deepseek-ocr`
 
-## Application UX Recommendation
+## Application Integration Recommendation
 
-Applications should call `validate_environment(config)` during setup or before an extraction run and display the report to operators.
+Applications should call `validate_environment(config)` during setup or before an extraction run and display the report to users or administrators.
 
 Recommended behavior:
 

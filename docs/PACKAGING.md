@@ -1,84 +1,56 @@
-# Packaging and Naming Guide
+# Package Names
 
-## Names
+The project uses two names:
 
-Use both names, for different purposes:
+- Install name: `pagewise-pdf-extractor`
+- Import name: `pagewise_pdf_extractor`
 
-- Distribution name: `pagewise-pdf-extractor`
-- Import package name: `pagewise_pdf_extractor`
+This is normal for Python packages. Package installers use the distribution name, while Python imports must use a valid Python identifier.
 
-This is the standard Python convention. Distribution/project names are what users install with `pip`, and they are commonly normalized with hyphens. Import package names must be valid Python identifiers, so they use underscores.
+## Install Name
 
-Examples:
+Use the hyphenated name with `pip`:
 
 ```powershell
-pip install pagewise-pdf-extractor
+python -m pip install pagewise-pdf-extractor
 ```
+
+For a pinned GitHub install:
+
+```txt
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.0
+```
+
+## Import Name
+
+Use the underscored name in Python code:
 
 ```python
 from pagewise_pdf_extractor import ExtractionConfig, process_pdf
 ```
 
-Do not change the import package to use hyphens; Python imports cannot use them.
+Do not import `pagewise-pdf-extractor` in Python code. Hyphens are not valid in Python module names.
 
-## Local Development Install
+## Command Name
 
-From this repository:
-
-```powershell
-python -m pip install -e .
-```
-
-From another repository such as `rag-engine`:
+The installed CLI command is:
 
 ```powershell
-python -m pip install -e D:\Developer\Projects\pagewise-pdf-extractor
+pagewise-pdf-extractor --help
 ```
 
-This installs the package in editable mode and installs declared Python dependencies.
+## External Tools
 
-For a packaging-only smoke test, maintainers may use:
+The Python package does not bundle external OCR tools or local model servers.
 
-```powershell
-python -m pip install -e . --no-deps
-```
+Depending on the configured providers, users may also need:
 
-That only verifies this package metadata and import wiring. It does not install runtime dependencies and should not be used as the normal setup command.
+- `marker_single` for Marker OCR
+- `ollama` for Ollama fallback
+- `pdftoppm` for rendering pages passed to Ollama
 
-## Runtime Dependency Checks
-
-After installation, run:
+Run the environment check after installation:
 
 ```powershell
 pagewise-pdf-extractor --validate-environment
 ```
-
-The report lists provider availability, missing Python packages, missing external binaries, degraded capabilities, fatal blockers, and install hints.
-
-External binaries are intentionally not bundled inside the Python wheel:
-
-- `marker_single`: required for Marker OCR
-- `ollama`: required for Ollama fallback
-- `pdftoppm`: required to render pages for Ollama fallback
-
-This package exposes those requirements through `validate_environment()` so applications can show their own setup guidance instead of failing deep inside an extraction run.
-
-```python
-from pagewise_pdf_extractor import ExtractionConfig, validate_environment
-
-report = validate_environment(ExtractionConfig(force_ocr=True))
-if report.has_fatal_errors:
-    raise RuntimeError(report.summary)
-```
-
-## Metadata
-
-Package metadata lives in `pyproject.toml`.
-
-Current release identity:
-
-- version: `0.1.0`
-- license: `MIT`
-- CLI entrypoint: `pagewise-pdf-extractor = "pagewise_pdf_extractor.cli:main"`
-
-Keep the version in sync with release tags.
