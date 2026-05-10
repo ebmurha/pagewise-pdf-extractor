@@ -16,7 +16,7 @@ Page-wise PDF to Markdown extraction with text extraction, OCR, LLM fallback, an
 
 ## Status
 
-`v0.1.1` is the current public release. The public API is intended for early downstream use by applications that need page-wise PDF extraction, but the project is still pre-`1.0`.
+`v0.2.0` is the current public release. The public API is intended for early downstream use by applications that need page-wise PDF extraction, but the project is still pre-`1.0`.
 
 ## Install
 
@@ -29,7 +29,7 @@ python -m pip install pagewise-pdf-extractor
 Pinned Git dependency:
 
 ```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.1
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.2.0
 ```
 
 Local development:
@@ -144,7 +144,7 @@ Default page-level routing:
 - [Packaging and naming guide](docs/PACKAGING.md)
 - [Releases and versioning](docs/RELEASE.md)
 - [Changelog](CHANGELOG.md)
-- [Release notes](docs/releases/v0.1.0.md)
+- [Release notes](docs/releases/v0.2.0.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
 
