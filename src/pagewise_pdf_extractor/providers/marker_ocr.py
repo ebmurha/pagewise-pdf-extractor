@@ -12,7 +12,7 @@ from pathlib import Path
 from ..config import ExtractionConfig
 from ..exceptions import ProviderError
 from ..models import ProviderCapability, ProviderResult
-from .base import PageExtractor, clean_console_output, text_quality_status
+from .base import PageExtractor, clean_console_output, markdown_layout_artifacts, text_quality_status
 
 MARKER_CMD = "marker_single"
 
@@ -84,6 +84,7 @@ class MarkerOCRExtractor(PageExtractor):
             status=status,
             characters=len(text),
             metadata={"stdout_stderr": clean_console_output(result.output)},
+            layout_artifacts=markdown_layout_artifacts(text, page_number),
         )
 
 

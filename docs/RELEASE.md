@@ -4,9 +4,9 @@ This package is versioned so applications can depend on a specific, reproducible
 
 ## Current Release
 
-The current documented release is `v0.1.1`.
+The current documented release is `v0.2.0`.
 
-`0.1.1` is an early integration release. The package is usable by downstream applications, but the public API may still change before `1.0.0`.
+`0.2.0` is an early integration release. The package is usable by downstream applications, but the public API may still change before `1.0.0`.
 
 ## Version Numbers
 
@@ -23,13 +23,13 @@ Before `1.0.0`, minor versions may still include API adjustments. Pin exact vers
 From PyPI when available:
 
 ```powershell
-python -m pip install pagewise-pdf-extractor==0.1.1
+python -m pip install pagewise-pdf-extractor==0.2.0
 ```
 
 From GitHub:
 
 ```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.1.1
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.2.0
 ```
 
 Avoid depending on `main`. Branches move, which makes installs non-reproducible.
@@ -46,6 +46,7 @@ Imports from internal modules, provider implementations, or repository scripts a
 
 ## Release Notes
 
+- [v0.2.0](releases/v0.2.0.md)
 - [v0.1.1](releases/v0.1.1.md)
 - [v0.1.0](releases/v0.1.0.md)
 

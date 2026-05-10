@@ -41,6 +41,26 @@ Thumbs.db
 .vscode/
 .idea/
 
+
+# AI / LLM coding agent local files
+.cursor/
+.cursorignore
+.cursorrules
+.claude/
+claude.md
+CLAUDE.md
+.github/copilot-instructions.md
+.codex/
+AGENTS.md
+agents.md
+.aider*
+.aider/
+.continue/
+.continueignore
+.windsurf/
+.windsurfrules
+.tabnine/
+
 # Temporary files
 *.tmp
 *.temp

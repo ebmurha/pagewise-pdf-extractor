@@ -40,11 +40,43 @@ class ProviderCapability:
 
 
 @dataclass(slots=True)
+class LayoutArtifact:
+    kind: str
+    page_number: int
+    bbox: tuple[float, float, float, float] | None = None
+    text: str | None = None
+    rows: list[list[str]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        data = asdict(self)
+        if self.bbox is not None:
+            data["bbox"] = [round(value, 3) for value in self.bbox]
+        return data
+
+    def model_dump(self) -> dict[str, Any]:
+        return self.to_dict()
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "LayoutArtifact":
+        bbox = data.get("bbox")
+        return cls(
+            kind=str(data.get("kind", "unknown")),
+            page_number=int(data.get("page_number", 0)),
+            bbox=tuple(float(value) for value in bbox) if bbox is not None else None,
+            text=data.get("text"),
+            rows=[list(map(str, row)) for row in data.get("rows", [])],
+            metadata=dict(data.get("metadata", {})),
+        )
+
+
+@dataclass(slots=True)
 class ProviderResult:
     text: str
     status: str
     characters: int
     metadata: dict[str, Any] = field(default_factory=dict)
+    layout_artifacts: list[LayoutArtifact] = field(default_factory=list)
 
 
 @dataclass(slots=True)
@@ -57,12 +89,14 @@ class PageExtractionResult:
     final_provider: str | None
     fallback_used: bool
     attempts: list[ProviderAttempt]
+    layout_artifacts: list[LayoutArtifact] = field(default_factory=list)
     error: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
         data["output_file"] = str(self.output_file)
         data["attempts"] = [attempt.to_dict() for attempt in self.attempts]
+        data["layout_artifacts"] = [artifact.to_dict() for artifact in self.layout_artifacts]
         return data
 
     def model_dump(self) -> dict[str, Any]:
