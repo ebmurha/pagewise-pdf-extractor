@@ -8,6 +8,7 @@ This document describes the stable public API intended for application integrati
 from pagewise_pdf_extractor import (
     ExtractionConfig,
     ExtractionResult,
+    LayoutArtifact,
     PageExtractionResult,
     ProviderAttempt,
     process_pdf,
@@ -96,7 +97,19 @@ Fields:
 - `final_provider`
 - `fallback_used`
 - `attempts`
+- `layout_artifacts`
 - `error`
+
+## LayoutArtifact
+
+Fields:
+
+- `kind`: `table`, `figure`, `drawing`, or provider-specific artifact type
+- `page_number`
+- `bbox`: optional PDF-space bounding box `[x0, y0, x1, y1]`
+- `text`: optional Markdown/text representation or caption
+- `rows`: table rows when available
+- `metadata`: provider-specific details such as source, image dimensions, or vector drawing attributes
 
 ## ProviderAttempt
 

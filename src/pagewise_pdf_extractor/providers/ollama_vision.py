@@ -12,7 +12,7 @@ from pathlib import Path
 from ..config import ExtractionConfig
 from ..exceptions import ProviderError
 from ..models import ProviderCapability, ProviderResult
-from .base import PageExtractor, clean_console_output, snippet, text_quality_status
+from .base import PageExtractor, clean_console_output, markdown_layout_artifacts, snippet, text_quality_status
 
 OLLAMA_CMD = "ollama"
 PDFTOPPM_CMD = "pdftoppm"
@@ -128,6 +128,7 @@ class OllamaVisionExtractor(PageExtractor):
             status=status,
             characters=len(text),
             metadata={"model": config.ollama_model, "render_dpi": config.render_dpi},
+            layout_artifacts=markdown_layout_artifacts(text, page_number),
         )
 
 

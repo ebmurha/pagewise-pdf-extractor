@@ -13,7 +13,7 @@ from .exceptions import (
     ProgressError,
     ProviderError,
 )
-from .models import EnvironmentReport, ExtractionResult, PageExtractionResult, ProviderAttempt
+from .models import EnvironmentReport, ExtractionResult, LayoutArtifact, PageExtractionResult, ProviderAttempt
 
 __version__ = EXTRACTOR_VERSION
 
@@ -21,6 +21,7 @@ __all__ = [
     "ExtractionConfig",
     "ExtractionResult",
     "PageExtractionResult",
+    "LayoutArtifact",
     "ProviderAttempt",
     "EnvironmentReport",
     "process_pdf",

@@ -7,9 +7,17 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from pagewise_pdf_extractor import ConcurrencyError, ExtractionConfig, ExtractionResult, process_pdf, validate_environment
+from pagewise_pdf_extractor import (
+    ConcurrencyError,
+    ExtractionConfig,
+    ExtractionResult,
+    LayoutArtifact,
+    process_pdf,
+    validate_environment,
+)
 from pagewise_pdf_extractor.api import EXTRACTOR_VERSION
 from pagewise_pdf_extractor.models import EnvironmentReport, ProviderCapability, ProviderResult
+from pagewise_pdf_extractor.providers.base import markdown_layout_artifacts
 
 
 def clean_report():
@@ -60,6 +68,40 @@ class PackageApiTests(unittest.TestCase):
         self.assertEqual(progress["config_hash"], result.config_hash)
         self.assertIn("config_used", progress)
         self.assertEqual(progress["status"], "ok")
+
+    def test_layout_artifacts_are_returned_and_persisted(self):
+        artifact = LayoutArtifact(
+            kind="table",
+            page_number=1,
+            bbox=(10.0, 20.0, 110.0, 80.0),
+            text="| A | B |\n| --- | --- |\n| 1 | 2 |",
+            rows=[["A", "B"], ["1", "2"]],
+            metadata={"source": "test"},
+        )
+
+        with patch("pagewise_pdf_extractor.api.validate_environment", return_value=clean_report()), \
+            patch("pagewise_pdf_extractor.api.get_total_pages", return_value=1), \
+            patch(
+                "pagewise_pdf_extractor.api.PyMuPDFTextExtractor.extract_page",
+                return_value=ProviderResult(
+                    text="embedded text with enough characters to pass the quality threshold",
+                    status="text_ok",
+                    characters=62,
+                    layout_artifacts=[artifact],
+                ),
+            ):
+            result = process_pdf(self.pdf_path, self.output_root, run_id="layout")
+
+        self.assertEqual(result.pages[0].layout_artifacts[0].kind, "table")
+        self.assertEqual(result.pages[0].layout_artifacts[0].rows, [["A", "B"], ["1", "2"]])
+        markdown = result.pages[0].output_file.read_text(encoding="utf-8")
+        self.assertIn("## Layout Artifacts", markdown)
+        self.assertIn("| A | B |", markdown)
+
+        progress = json.loads(result.progress_path.read_text(encoding="utf-8"))
+        saved_artifact = progress["pages"]["1"]["layout_artifacts"][0]
+        self.assertEqual(saved_artifact["kind"], "table")
+        self.assertEqual(saved_artifact["bbox"], [10.0, 20.0, 110.0, 80.0])
 
     def test_marker_failure_falls_back_to_ollama(self):
         def marker_fail(*_args, **_kwargs):
@@ -165,6 +207,24 @@ class PackageApiTests(unittest.TestCase):
             (output_dir / ".pagewise-extractor.lock").write_text("locked", encoding="utf-8")
             with self.assertRaises(ConcurrencyError):
                 process_pdf(self.pdf_path, self.output_root, run_id="locked")
+
+    def test_markdown_layout_artifacts_detect_tables_and_figures(self):
+        text = "\n".join(
+            [
+                "| Col A | Col B |",
+                "| --- | --- |",
+                "| one | two |",
+                "",
+                "![Chart caption](images/chart.png)",
+            ]
+        )
+
+        artifacts = markdown_layout_artifacts(text, page_number=3)
+
+        self.assertEqual([artifact.kind for artifact in artifacts], ["table", "figure"])
+        self.assertEqual(artifacts[0].rows, [["Col A", "Col B"], ["one", "two"]])
+        self.assertEqual(artifacts[1].text, "Chart caption")
+        self.assertEqual(artifacts[1].metadata["target"], "images/chart.png")
 
     def test_validate_environment_reports_forced_fallback_missing_tools_as_fatal(self):
         with patch("pagewise_pdf_extractor.providers.pymupdf_text.PyMuPDFTextExtractor.validate", return_value=ProviderCapability("pymupdf", True)), \

@@ -105,5 +105,6 @@ def page_progress_record(page: PageExtractionResult) -> dict[str, Any]:
         "final_provider": page.final_provider,
         "fallback_used": page.fallback_used,
         "attempts": [attempt.to_dict() for attempt in page.attempts],
+        "layout_artifacts": [artifact.to_dict() for artifact in page.layout_artifacts],
         **({"error": page.error} if page.error else {}),
     }

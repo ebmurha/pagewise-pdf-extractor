@@ -21,7 +21,7 @@ from .exceptions import (
     ProviderError,
 )
 from .markdown import write_failure_markdown, write_page_markdown
-from .models import ExtractionResult, PageExtractionResult, ProviderAttempt, ProviderResult
+from .models import ExtractionResult, LayoutArtifact, PageExtractionResult, ProviderAttempt, ProviderResult
 from .progress import (
     PROGRESS_FILE_NAME,
     SCHEMA_VERSION,
@@ -188,7 +188,7 @@ def _process_page(
     try:
         final = _extract_page_with_providers(input_pdf, page_number, total_pages, config, attempts)
         duration = round(time.perf_counter() - start, 3)
-        page_path = write_page_markdown(output_dir, page_number, final.text)
+        page_path = write_page_markdown(output_dir, page_number, final.text, final.layout_artifacts)
         status = _page_status(final, attempts)
         logger.info(
             "page extraction complete",
@@ -209,6 +209,7 @@ def _process_page(
             final_provider=attempts[-1].provider if attempts else None,
             fallback_used=any(attempt.provider == config.fallback_provider and attempt.status == "ok" for attempt in attempts),
             attempts=attempts,
+            layout_artifacts=final.layout_artifacts,
         )
     except PageExtractionError as exc:
         duration = round(time.perf_counter() - start, 3)
@@ -395,6 +396,9 @@ def _pages_from_progress(progress: dict) -> list[PageExtractionResult]:
     pages = []
     for raw_page, record in progress.get("pages", {}).items():
         attempts = [ProviderAttempt(**attempt) for attempt in record.get("attempts", [])]
+        layout_artifacts = [
+            LayoutArtifact.from_dict(artifact) for artifact in record.get("layout_artifacts", [])
+        ]
         pages.append(
             PageExtractionResult(
                 page_number=int(raw_page),
@@ -405,6 +409,7 @@ def _pages_from_progress(progress: dict) -> list[PageExtractionResult]:
                 final_provider=record.get("final_provider"),
                 fallback_used=bool(record.get("fallback_used", False)),
                 attempts=attempts,
+                layout_artifacts=layout_artifacts,
                 error=record.get("error"),
             )
         )
