@@ -81,6 +81,8 @@ class OCRPreprocessingTests(unittest.TestCase):
         from pagewise_pdf_extractor.preprocessing import prepare_page_for_ocr
 
         sample = Path(__file__).resolve().parents[1] / "local-docs" / "samples" / "two-up-pdf-sample.pdf"
+        if not sample.exists():
+            self.skipTest("private two-up regression sample is not available")
         with tempfile.TemporaryDirectory() as temp_dir:
             for page_number in range(1, 4):
                 prepared = prepare_page_for_ocr(
@@ -98,6 +100,8 @@ class OCRPreprocessingTests(unittest.TestCase):
         from pagewise_pdf_extractor.preprocessing import prepare_page_for_ocr
 
         sample = Path(__file__).resolve().parents[1] / "local-docs" / "samples" / "two-up-pdf-sample.pdf"
+        if not sample.exists():
+            self.skipTest("private two-up regression sample is not available")
         with tempfile.TemporaryDirectory() as temp_dir:
             prepared = prepare_page_for_ocr(
                 sample,
@@ -114,6 +118,8 @@ class OCRPreprocessingTests(unittest.TestCase):
         from pagewise_pdf_extractor.preprocessing import prepare_page_for_ocr
 
         sample = Path(__file__).resolve().parents[1] / "local-docs" / "samples" / "incorrect-pdf-from-word.pdf"
+        if not sample.exists():
+            self.skipTest("private Distiller regression sample is not available")
         with tempfile.TemporaryDirectory() as temp_dir:
             for page_number in (1, 2, 11, 20):
                 prepared = prepare_page_for_ocr(
