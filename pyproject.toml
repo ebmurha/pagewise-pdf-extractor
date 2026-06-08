@@ -35,6 +35,7 @@ dependencies = [
   "marker-pdf",
   "pypdf",
   "PyMuPDF",
+  "numpy",
   "tqdm",
   "python-json-logger",
   "python-dotenv",

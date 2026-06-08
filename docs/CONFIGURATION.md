@@ -31,16 +31,25 @@ Default behavior is page-level resilience: failed pages are recorded while later
 
 - `min_text_chars`: minimum characters required to accept embedded text.
 - `min_ocr_chars`: minimum characters required to accept OCR output.
+- `validate_text_quality`: reject embedded text with corrupt glyph streams, abnormal PDF word spacing, or other structural quality failures.
+- `prefer_visual_tables`: route table-heavy pages to OCR/layout extraction even when embedded text exists.
 
 Provider attempts rejected by thresholds are recorded as `low_quality`.
+Text-provider attempt metadata includes `quality_score`, `quality_reasons`, and `quality_metrics`.
 
 ## Marker Settings
 
 ```python
-ExtractionConfig(marker_model_cache_dir=Path("path/to/marker-model-cache"))
+ExtractionConfig(
+    marker_model_cache_dir=Path("path/to/marker-model-cache"),
+    marker_render_dpi=350,
+    detect_two_up=True,
+)
 ```
 
 If unset, Marker uses its normal cache behavior. On a cold cache, Marker may download models during the first OCR run.
+
+Marker input is rendered into an image-only temporary PDF so a corrupt embedded text layer cannot influence OCR. Confidently detected two-up pages are split into left and right logical pages. The output remains one Markdown file per physical source page, with `## Logical Page N` sections and `logical_page` layout artifacts containing source PDF coordinates.
 
 ## Ollama Settings
 

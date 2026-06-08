@@ -366,6 +366,8 @@ def _validate_config(config: ExtractionConfig) -> None:
         raise ConfigurationError("Only fallback_provider=None or 'ollama' is currently supported.")
     if config.force_fallback and config.fallback_provider != "ollama":
         raise ConfigurationError("force_fallback requires fallback_provider='ollama'.")
+    if config.marker_render_dpi < 72:
+        raise ConfigurationError("marker_render_dpi must be at least 72.")
 
 
 def _resolve_output_dir(output_root: Path, input_sha256: str, run_id: str, config: ExtractionConfig) -> Path:

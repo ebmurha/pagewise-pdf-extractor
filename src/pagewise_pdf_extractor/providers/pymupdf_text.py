@@ -10,7 +10,8 @@ from typing import Any
 from ..config import ExtractionConfig
 from ..exceptions import ProviderError
 from ..models import LayoutArtifact, ProviderCapability, ProviderResult
-from .base import PageExtractor, text_quality_status
+from ..quality import assess_embedded_text
+from .base import PageExtractor
 
 
 class PyMuPDFTextExtractor(PageExtractor):
@@ -42,21 +43,37 @@ class PyMuPDFTextExtractor(PageExtractor):
                 page = document.load_page(page_number - 1)
                 text = page.get_text("text", sort=True).strip()
                 layout_artifacts = _extract_layout_artifacts(page, page_number)
+                fonts = page.get_fonts(full=True)
+                spacing_ratio, spacing_pairs = _suspicious_word_spacing(page)
         except Exception as exc:
             raise ProviderError(f"PyMuPDF text extraction failed: {exc}") from exc
 
-        status = text_quality_status(
+        quality = assess_embedded_text(
             text,
-            config.min_text_chars,
-            ok_status="text_ok",
-            empty_status="text_empty",
-            low_status="text_low_quality",
+            min_chars=config.min_text_chars,
+            fonts=fonts,
+            table_count=sum(artifact.kind == "table" for artifact in layout_artifacts),
+            suspicious_spacing_ratio=spacing_ratio,
+            suspicious_spacing_pairs=spacing_pairs,
+            prefer_visual_tables=config.prefer_visual_tables,
         )
+        if not text.strip():
+            status = "text_empty"
+        elif not config.validate_text_quality:
+            status = "text_ok" if len(text) >= config.min_text_chars else "text_low_quality"
+        else:
+            status = "text_ok" if quality.accepted else "text_low_quality"
         return ProviderResult(
             text=text,
             status=status,
             characters=len(text),
-            metadata={"page_number": page_number, "total_pages": total_pages},
+            metadata={
+                "page_number": page_number,
+                "total_pages": total_pages,
+                "quality_score": quality.score,
+                "quality_reasons": quality.reasons,
+                "quality_metrics": quality.metrics,
+            },
             layout_artifacts=layout_artifacts,
         )
 
@@ -67,6 +84,36 @@ def _extract_layout_artifacts(page: Any, page_number: int) -> list[LayoutArtifac
     artifacts.extend(_extract_image_artifacts(page, page_number))
     artifacts.extend(_extract_drawing_artifacts(page, page_number))
     return artifacts
+
+
+def _suspicious_word_spacing(page: Any) -> tuple[float, int]:
+    try:
+        words = page.get_text("words", sort=True)
+    except Exception:
+        return 0.0, 0
+
+    lines: dict[tuple[int, int], list[Any]] = {}
+    for word in words:
+        if len(word) >= 7:
+            lines.setdefault((int(word[5]), int(word[6])), []).append(word)
+
+    suspicious = 0
+    pairs = 0
+    for line_words in lines.values():
+        ordered = sorted(line_words, key=lambda word: float(word[0]))
+        for left, right in zip(ordered, ordered[1:]):
+            left_text = str(left[4])
+            right_text = str(right[4])
+            if not left_text.isalpha() or not right_text.isalpha():
+                continue
+            left_width = (float(left[2]) - float(left[0])) / max(len(left_text), 1)
+            right_width = (float(right[2]) - float(right[0])) / max(len(right_text), 1)
+            typical_width = max(min(left_width, right_width), 0.1)
+            gap_ratio = (float(right[0]) - float(left[2])) / typical_width
+            pairs += 1
+            if gap_ratio < 0.3:
+                suspicious += 1
+    return suspicious / max(pairs, 1), suspicious
 
 
 def _extract_table_artifacts(page: Any, page_number: int) -> list[LayoutArtifact]:
@@ -85,6 +132,8 @@ def _extract_table_artifacts(page: Any, page_number: int) -> list[LayoutArtifact
             rows = _normalize_table_rows(table.extract())
         except Exception:
             rows = []
+        if not _usable_table_rows(rows):
+            continue
         artifacts.append(
             LayoutArtifact(
                 kind="table",
@@ -167,6 +216,14 @@ def _extract_drawing_artifacts(page: Any, page_number: int) -> list[LayoutArtifa
 
 def _normalize_table_rows(rows: Any) -> list[list[str]]:
     return [["" if cell is None else str(cell).strip() for cell in row] for row in rows or []]
+
+
+def _usable_table_rows(rows: list[list[str]]) -> bool:
+    if len(rows) < 2 or max((len(row) for row in rows), default=0) < 2:
+        return False
+    cells = [cell for row in rows for cell in row]
+    nonempty = sum(bool(cell) for cell in cells)
+    return nonempty >= 4 and nonempty / max(len(cells), 1) >= 0.15
 
 
 def _rows_to_markdown(rows: list[list[str]]) -> str:

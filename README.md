@@ -8,6 +8,8 @@ Page-wise PDF to Markdown extraction with text extraction, OCR, LLM fallback, an
 
 - Extracts text-native PDF pages with PyMuPDF.
 - Extracts scanned/image pages with Marker.
+- Rejects corrupt or structurally unreliable embedded text before provider routing.
+- Detects and splits two-up scanned pages before OCR.
 - Falls back to Ollama vision OCR when configured OCR fails.
 - Writes one UTF-8 Markdown file per page.
 - Writes atomic `progress.json` with provider attempts, status, config hash, source hash, and page metadata.
@@ -130,10 +132,12 @@ Error: <error_message>
 Default page-level routing:
 
 1. Try embedded text extraction with PyMuPDF.
-2. Accept embedded text when it meets configured quality thresholds.
-3. Use Marker OCR when embedded text is absent, low quality, or `force_ocr=True`.
-4. Use Ollama fallback when Marker fails or returns unusable output and fallback is enabled.
-5. Write failure Markdown if all configured providers fail.
+2. Validate embedded text for corrupt glyphs, abnormal spacing, and table-heavy visual layout.
+3. Accept embedded text when it meets configured length and structural quality thresholds.
+4. Render Marker input at 350 DPI and split confidently detected two-up pages into logical pages.
+5. Use Marker OCR when embedded text is absent, low quality, or `force_ocr=True`.
+6. Use Ollama fallback when Marker fails or returns unusable output and fallback is enabled.
+7. Write failure Markdown if all configured providers fail.
 
 ## Documentation
 
@@ -158,4 +162,4 @@ pagewise-pdf-extractor --help
 
 ## Future Goals
 
-Future work should preserve the public API, keep provider behavior explicit, and add new providers or extraction quality improvements behind documented configuration.
+Future work to preserve the public API, keep provider behavior explicit, and add new providers or extraction quality improvements behind documented configuration.

@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Added structural embedded-text quality diagnostics for corrupt glyphs, abnormal spacing, and table-heavy pages.
+- Added 350 DPI image-only Marker preprocessing with automatic two-up page detection and splitting.
+- Added logical-page layout artifacts with source coordinates and split confidence.
+
 ## v0.2.0
 
 Adds layout artifact preservation for richer PDF structure, including tables, figures/images, and vector drawing metadata where providers expose it.
