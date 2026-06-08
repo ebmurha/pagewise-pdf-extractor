@@ -13,7 +13,7 @@ python -m pip install pagewise-pdf-extractor
 Pinned GitHub install:
 
 ```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.2.0
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.3.0
 ```
 
 ## Validate Environment
