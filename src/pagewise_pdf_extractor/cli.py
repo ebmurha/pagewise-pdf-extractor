@@ -26,6 +26,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--no-fallback", action="store_true", help="Disable fallback OCR")
     parser.add_argument("--min-text-chars", type=int, default=50, help="Minimum chars for accepting embedded text")
     parser.add_argument("--min-ocr-chars", type=int, default=20, help="Minimum chars for accepting OCR output")
+    parser.add_argument("--no-text-quality-check", action="store_true", help="Disable structural validation of embedded text")
+    parser.add_argument("--no-visual-tables", action="store_true", help="Allow embedded text on table-heavy pages")
+    parser.add_argument("--no-two-up-detection", action="store_true", help="Disable automatic two-up page splitting")
+    parser.add_argument("--marker-render-dpi", type=int, default=350, help="DPI used to preprocess pages for Marker OCR")
     parser.add_argument("--render-dpi", type=int, default=200, help="DPI used when rendering pages for fallback OCR")
     parser.add_argument("--separate-runs", action="store_true", help="Write output under <sha256>/<run_id>")
     parser.add_argument("--validate-environment", action="store_true", help="Validate providers and exit")
@@ -41,6 +45,10 @@ def main(argv: list[str] | None = None) -> int:
         force_fallback=args.force_fallback,
         min_text_chars=args.min_text_chars,
         min_ocr_chars=args.min_ocr_chars,
+        validate_text_quality=not args.no_text_quality_check,
+        prefer_visual_tables=not args.no_visual_tables,
+        detect_two_up=not args.no_two_up_detection,
+        marker_render_dpi=args.marker_render_dpi,
         marker_model_cache_dir=Path(args.marker_model_cache_dir) if args.marker_model_cache_dir else None,
         ollama_model=args.ollama_model,
         ollama_endpoint=args.ollama_endpoint,

@@ -20,6 +20,10 @@ class ExtractionConfig:
     force_fallback: bool = False
     min_text_chars: int = 50
     min_ocr_chars: int = 20
+    validate_text_quality: bool = True
+    prefer_visual_tables: bool = True
+    detect_two_up: bool = True
+    marker_render_dpi: int = 350
     output_format: str = "markdown"
     marker_model_cache_dir: Path | None = None
     ollama_model: str = "deepseek-ocr"

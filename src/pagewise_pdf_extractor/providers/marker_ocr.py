@@ -12,9 +12,11 @@ from pathlib import Path
 from ..config import ExtractionConfig
 from ..exceptions import ProviderError
 from ..models import ProviderCapability, ProviderResult
+from ..preprocessing import prepare_page_for_ocr
 from .base import PageExtractor, clean_console_output, markdown_layout_artifacts, text_quality_status
 
 MARKER_CMD = "marker_single"
+PAGE_BREAK = "PAGEWISE_LOGICAL_PAGE_BREAK"
 
 
 class MarkerOCRExtractor(PageExtractor):
@@ -47,19 +49,26 @@ class MarkerOCRExtractor(PageExtractor):
             config.marker_model_cache_dir.mkdir(parents=True, exist_ok=True)
             os.environ["MODEL_CACHE_DIR"] = str(config.marker_model_cache_dir.resolve())
 
-        page_index = page_number - 1
         with tempfile.TemporaryDirectory(prefix="pagewise_marker_") as temp_dir_str:
             temp_dir = Path(temp_dir_str)
+            prepared = prepare_page_for_ocr(
+                pdf_path,
+                page_number,
+                temp_dir / "prepared-page.pdf",
+                dpi=config.marker_render_dpi,
+                detect_two_up=config.detect_two_up,
+            )
             cmd = [
                 MARKER_CMD,
-                str(pdf_path),
+                str(prepared.pdf_path),
                 "--output_format",
                 "markdown",
                 "--output_dir",
                 str(temp_dir),
-                "--page_range",
-                str(page_index),
                 "--force_ocr",
+                "--paginate_output",
+                "--page_separator",
+                PAGE_BREAK,
             ]
             result = _run_streamed(cmd)
             if result.returncode != 0:
@@ -70,7 +79,10 @@ class MarkerOCRExtractor(PageExtractor):
             markdown_files = sorted(temp_dir.rglob("*.md"), key=lambda path: len(str(path)))
             if not markdown_files:
                 raise ProviderError("marker_single produced no markdown output")
-            text = markdown_files[0].read_text(encoding="utf-8").strip()
+            text = _logical_page_headings(
+                markdown_files[0].read_text(encoding="utf-8").strip(),
+                prepared.logical_pages,
+            )
 
         status = text_quality_status(
             text,
@@ -83,8 +95,15 @@ class MarkerOCRExtractor(PageExtractor):
             text=text,
             status=status,
             characters=len(text),
-            metadata={"stdout_stderr": clean_console_output(result.output)},
-            layout_artifacts=markdown_layout_artifacts(text, page_number),
+            metadata={
+                "stdout_stderr": clean_console_output(result.output),
+                "render_dpi": config.marker_render_dpi,
+                "logical_pages": prepared.logical_pages,
+                "two_up_detected": prepared.logical_pages == 2,
+                "split_ratio": prepared.split_ratio,
+                "split_confidence": prepared.split_confidence,
+            },
+            layout_artifacts=prepared.artifacts + markdown_layout_artifacts(text, page_number),
         )
 
 
@@ -123,3 +142,21 @@ def _marker_cache_warnings(config: ExtractionConfig) -> list[str]:
     if config.marker_model_cache_dir:
         return [f"Marker model cache: {config.marker_model_cache_dir}"]
     return ["Marker may download/cache models during the first OCR run."]
+
+
+def _logical_page_headings(text: str, logical_pages: int) -> str:
+    if logical_pages <= 1:
+        return text.replace(PAGE_BREAK, "").strip()
+    import re
+
+    index = 0
+
+    def replace_break(_match) -> str:
+        nonlocal index
+        index += 1
+        return f"\n\n## Logical Page {index}\n\n"
+
+    normalized = re.sub(r"\{\d+\}" + re.escape(PAGE_BREAK), replace_break, text)
+    if index == 0:
+        normalized = f"## Logical Page 1\n\n{normalized}"
+    return normalized.strip()

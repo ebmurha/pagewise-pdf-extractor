@@ -54,6 +54,10 @@ ExtractionConfig(
     force_fallback=False,
     min_text_chars=50,
     min_ocr_chars=20,
+    validate_text_quality=True,
+    prefer_visual_tables=True,
+    detect_two_up=True,
+    marker_render_dpi=350,
     marker_model_cache_dir=None,
     ollama_model="deepseek-ocr",
     ollama_endpoint=None,
@@ -104,12 +108,12 @@ Fields:
 
 Fields:
 
-- `kind`: `table`, `figure`, `drawing`, or provider-specific artifact type
+- `kind`: `table`, `figure`, `drawing`, `logical_page`, or provider-specific artifact type
 - `page_number`
 - `bbox`: optional PDF-space bounding box `[x0, y0, x1, y1]`
 - `text`: optional Markdown/text representation or caption
 - `rows`: table rows when available
-- `metadata`: provider-specific details such as source, image dimensions, or vector drawing attributes
+- `metadata`: provider-specific details such as source, image dimensions, vector drawing attributes, quality diagnostics, or logical-page order
 
 ## ProviderAttempt
 

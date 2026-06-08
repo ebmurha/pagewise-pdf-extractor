@@ -7,7 +7,7 @@ This document describes how applications can consume the package.
 Use a pinned tag:
 
 ```txt
-pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.2.0
+pagewise-pdf-extractor @ git+https://github.com/ebmurha/pagewise-pdf-extractor.git@v0.3.0
 ```
 
 Do not depend on `main`.
